@@ -48,7 +48,7 @@
         <div class="my-1 mx-2 border-t border-gray-200" />
 
         <a
-          href="http://127.0.0.1:8000/admin/"
+          :href="adminUrl"
           target="_blank"
           rel="noopener noreferrer"
           :title="appStore.sidebarCollapsed ? 'Administración' : undefined"
@@ -105,7 +105,7 @@
 
         <div class="flex items-center gap-2 ml-auto shrink-0">
           <a
-            href="http://127.0.0.1:8000/admin/"
+            :href="adminUrl"
             target="_blank"
             rel="noopener noreferrer"
             class="flex items-center gap-1.5 text-sm font-medium text-white bg-primary hover:bg-primary-dark rounded-lg px-3 py-1.5 transition-colors"
@@ -153,6 +153,7 @@ import { useAppStore } from '../stores/app'
 
 const appStore = useAppStore()
 const mobileOpen = ref(false)
+const adminUrl = useRuntimeConfig().public.apiBase + '/admin/'
 
 const publicNav = [
   { to: '/', icon: 'heroicons:squares-2x2', label: 'Panel' },
