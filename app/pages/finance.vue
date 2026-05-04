@@ -153,6 +153,22 @@
               <dd class="font-medium text-gray-800 truncate">{{ account.email }}</dd>
             </div>
           </dl>
+
+          <!-- Copy button -->
+          <button
+            class="w-full flex items-center justify-center gap-2 py-2 rounded-lg border text-sm font-medium transition-all duration-200"
+            :class="copiedId === account.id
+              ? 'border-green-200 bg-green-50 text-green-600'
+              : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-primary/40 hover:bg-primary/5 hover:text-primary'"
+            @click="copyAccount(account)"
+          >
+            <Icon
+              :name="copiedId === account.id ? 'heroicons:check' : 'heroicons:clipboard-document'"
+              class="w-4 h-4 transition-all duration-200"
+              :class="copiedId === account.id ? 'scale-110' : 'scale-100'"
+            />
+            {{ copiedId === account.id ? 'Datos copiados' : 'Copiar datos bancarios' }}
+          </button>
         </div>
       </div>
 
@@ -177,6 +193,23 @@ const tabs = [
 type TabId = typeof tabs[number]['id']
 
 const activeTab = ref<TabId>('caja')
+
+const copiedId = ref<number | null>(null)
+
+function copyAccount(account: { id: number; name: string; rut: string; bank: string; account_type_display: string; account_number: string; email: string }) {
+  const text = [
+    `Nombre: ${account.name}`,
+    `RUT: ${account.rut}`,
+    `Banco: ${account.bank}`,
+    `Tipo de cuenta: ${account.account_type_display}`,
+    `Número de cuenta: ${account.account_number}`,
+    `Correo: ${account.email}`,
+  ].join('\n')
+  navigator.clipboard.writeText(text).then(() => {
+    copiedId.value = account.id
+    setTimeout(() => { copiedId.value = null }, 2000)
+  })
+}
 
 const now = new Date()
 const selectedYear = ref(now.getFullYear())

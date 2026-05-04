@@ -64,7 +64,8 @@
             :href="book.pdf_url"
             target="_blank"
             rel="noopener noreferrer"
-            class="mt-auto flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-gray-100 text-gray-600 text-xs font-medium hover:bg-gray-200 transition-colors"
+            class="mt-auto flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors"
+            style="background-color: rgb(129 145 146); color: rgb(255 255 255);"
           >
             <Icon name="heroicons:document-arrow-down" class="w-4 h-4" />
             Ver PDF

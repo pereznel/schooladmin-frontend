@@ -139,7 +139,7 @@
           class="flex flex-col items-center gap-0.5 text-gray-400 hover:text-primary transition-colors px-3"
           active-class="text-primary"
         >
-          <Icon :name="item.icon" class="w-5 h-5" />
+          <Icon :name="item.icon" class="w-[1.5625rem] h-[1.5625rem]" />
           <span class="text-[10px]">{{ item.label }}</span>
         </NuxtLink>
       </nav>
