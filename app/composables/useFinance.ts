@@ -38,7 +38,10 @@ export const useFinance = () => {
   const fetchMovements = (page = 1, pageSize = 20) =>
     apiFetch<MovementsPage>(`/api/finance/movements/?page=${page}&page_size=${pageSize}`)
 
-  return { fetchSummary, fetchChart, fetchPayments, registerPayment, fetchExpenses, createExpense, updateExpense, deleteExpense, fetchMovements }
+  const fetchBankAccounts = () =>
+    apiFetch<BankAccount[]>('/api/finance/bank-accounts/')
+
+  return { fetchSummary, fetchChart, fetchPayments, registerPayment, fetchExpenses, createExpense, updateExpense, deleteExpense, fetchMovements, fetchBankAccounts }
 }
 
 export interface FinancialSummary {
@@ -100,4 +103,16 @@ export interface MovementsPage {
   next: string | null
   previous: string | null
   results: Movement[]
+}
+
+export interface BankAccount {
+  id: number
+  name: string
+  rut: string
+  bank: string
+  account_type: 'corriente' | 'vista' | 'ahorro'
+  account_type_display: string
+  account_number: string
+  email: string
+  is_favorite: boolean
 }
