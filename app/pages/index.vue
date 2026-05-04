@@ -81,8 +81,17 @@
             >
               <div class="w-2 h-2 rounded-full mt-1.5 shrink-0" :style="{ backgroundColor: event.color || '#78716C' }" />
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-800 truncate">{{ event.title }}</p>
-                <p class="text-xs text-gray-400">{{ formatDate(event.start) }}</p>
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                  <p class="text-sm font-medium text-gray-800 leading-snug">{{ event.title }}</p>
+                  <span
+                    v-if="event.extendedProps?.event_type"
+                    class="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap"
+                  >{{ event.extendedProps.event_type }}</span>
+                </div>
+                <p v-if="event.extendedProps?.description" class="text-xs text-gray-500 mt-0.5 leading-snug">
+                  {{ event.extendedProps.description }}
+                </p>
+                <p class="text-xs text-gray-400 mt-1">{{ formatDate(event.start) }}</p>
               </div>
             </div>
             <div v-if="!upcomingEvents.length" class="px-5 py-6 text-center text-sm text-gray-400">
@@ -129,6 +138,33 @@
         </div>
       </div>
     </div>
+
+    <!-- Event detail modal -->
+    <UiModalBase
+      :open="!!selectedCalEvent"
+      :title="selectedCalEvent?.title || 'Evento'"
+      @close="selectedCalEvent = null"
+    >
+      <div v-if="selectedCalEvent" class="space-y-4">
+        <span
+          v-if="selectedCalEvent.event_type"
+          class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
+          :style="{ backgroundColor: (selectedCalEvent.color || '#C1524A') + '22', color: selectedCalEvent.color || '#C1524A' }"
+        >
+          {{ selectedCalEvent.event_type }}
+        </span>
+
+        <div class="flex items-center gap-2 text-sm text-gray-600">
+          <Icon name="heroicons:calendar" class="w-4 h-4 shrink-0 text-gray-400" />
+          <span>{{ formatEventDate(selectedCalEvent.start) }}</span>
+        </div>
+
+        <p v-if="selectedCalEvent.description" class="text-sm text-gray-700 leading-relaxed">
+          {{ selectedCalEvent.description }}
+        </p>
+        <p v-else class="text-sm text-gray-400 italic">Sin descripción</p>
+      </div>
+    </UiModalBase>
   </div>
 </template>
 
@@ -138,8 +174,16 @@ import { useCalendar } from '../composables/useCalendar'
 import { useFinance } from '../composables/useFinance'
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
-import type { CalendarOptions } from '@fullcalendar/core'
+import type { CalendarOptions, EventClickArg } from '@fullcalendar/core'
 import type { CalendarEvent } from '../composables/useCalendar'
+
+interface CalEventPopup {
+  title: string
+  start: Date
+  color: string
+  event_type?: string
+  description?: string
+}
 
 const MONTH_LABELS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
 
@@ -186,6 +230,19 @@ const filteredChart = computed(() => {
   }
 })
 
+// Event detail popup
+const selectedCalEvent = ref<CalEventPopup | null>(null)
+
+function handleMiniCalEventClick(info: EventClickArg) {
+  selectedCalEvent.value = {
+    title: info.event.title,
+    start: info.event.start!,
+    color: info.event.backgroundColor,
+    event_type: (info.event.extendedProps as CalEventPopup).event_type,
+    description: (info.event.extendedProps as CalEventPopup).description,
+  }
+}
+
 // Mini calendar ref and displayed month tracking
 const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null)
 const calendarDate = ref(new Date())
@@ -210,7 +267,7 @@ const calendarOptions: CalendarOptions = {
   headerToolbar: false,
   editable: false,
   selectable: false,
-  eventClick: undefined,
+  eventClick: handleMiniCalEventClick,
   events: async (_info: unknown, successCallback: (e: object[]) => void, failureCallback: (e: Error) => void) => {
     try {
       const data = await fetchEvents()
@@ -251,9 +308,17 @@ function formatAmount(n: number) {
 }
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('es-AR', {
-    day: 'numeric', month: 'short',
-  })
+  const d = new Date(iso)
+  const day = d.toLocaleDateString('es-CL', { day: 'numeric' })
+  const month = d.toLocaleDateString('es-CL', { month: 'long' })
+  return `${day} de ${month.charAt(0).toUpperCase() + month.slice(1)}`
+}
+
+function formatEventDate(d: Date) {
+  const day = d.toLocaleDateString('es-CL', { day: 'numeric' })
+  const month = d.toLocaleDateString('es-CL', { month: 'long' })
+  const year = d.toLocaleDateString('es-CL', { year: 'numeric' })
+  return `${day} de ${month.charAt(0).toUpperCase() + month.slice(1)} ${year}`
 }
 </script>
 

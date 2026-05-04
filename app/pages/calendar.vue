@@ -25,13 +25,13 @@
       </ClientOnly>
     </div>
 
-    <!-- Event detail panel -->
-    <UiSlideOver :open="!!selectedEvent" :title="selectedEvent?.title || 'Evento'" @close="selectedEvent = null">
+    <!-- Event detail modal -->
+    <UiModalBase :open="!!selectedEvent" :title="selectedEvent?.title || 'Evento'" @close="selectedEvent = null">
       <CalendarEventPanel
         :event="selectedEvent"
         @edit="openEditEvent"
       />
-    </UiSlideOver>
+    </UiModalBase>
 
     <!-- Create/edit event modal (admin only) -->
     <UiModalBase
