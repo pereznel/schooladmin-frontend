@@ -1,7 +1,10 @@
 <template>
   <div class="bg-white rounded-xl border border-gray-200 flex flex-col">
-    <div class="px-5 py-4 border-b border-gray-100">
+    <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
       <h2 class="font-semibold text-gray-800">Últimos movimientos</h2>
+      <NuxtLink to="/finance/movimientos" class="text-xs font-medium text-primary hover:underline">
+        Ver todos →
+      </NuxtLink>
     </div>
 
     <div class="flex-1 overflow-x-auto">
@@ -29,23 +32,23 @@
               class="hover:bg-gray-50 transition-colors"
             >
               <td class="px-4 py-3 whitespace-nowrap">
-                <span :class="typeBadgeClass(mov.type)">{{ typeLabel(mov.type) }}</span>
+                <span :class="movementTypeBadgeClass(mov.type)">{{ movementTypeLabel(mov.type) }}</span>
               </td>
               <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{{ monthName(mov.month) }}</td>
               <td
                 class="px-4 py-3 text-right font-semibold whitespace-nowrap"
                 :class="mov.type === 'expense' ? 'text-overdue' : 'text-paid'"
               >
-                {{ mov.type === 'expense' ? '-' : '+' }}{{ formatAmount(mov.amount) }}
+                {{ mov.type === 'expense' ? '-' : '+' }}{{ formatClp(mov.amount) }}
               </td>
               <td class="px-4 py-3 text-gray-600 max-w-[180px] truncate">
                 {{ mov.description || '–' }}
               </td>
               <td class="px-4 py-3 text-gray-700 whitespace-nowrap">
-                {{ mov.student_name || '–' }}
+                {{ mov.student_name || 'No aplica' }}
               </td>
-              <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{{ formatDate(mov.date) }}</td>
-              <td class="px-4 py-3 text-gray-500 whitespace-nowrap">{{ formatDate(mov.created_at) }}</td>
+              <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{{ formatShortDate(mov.date) }}</td>
+              <td class="px-4 py-3 text-gray-500 whitespace-nowrap">{{ formatShortDate(mov.created_at) }}</td>
             </tr>
           </tbody>
         </table>
@@ -83,7 +86,6 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { Movement } from '~/composables/useFinance'
 
 const PAGE_SIZE = 20
 
@@ -93,41 +95,11 @@ const page = ref(1)
 
 const { data: movements, pending } = useAsyncData(
   () => `finance-movements-${page.value}`,
-  () => fetchMovements(page.value, PAGE_SIZE),
+  () => fetchMovements({ page: page.value, page_size: PAGE_SIZE }),
   { watch: [page] }
 )
 
 const totalPages = computed(() =>
   movements.value ? Math.max(1, Math.ceil(movements.value.count / PAGE_SIZE)) : 1
 )
-
-function typeLabel(type: Movement['type']) {
-  return { monthly_payment: 'Mensualidad', manual_payment: 'Pago manual', expense: 'Egreso' }[type] ?? type
-}
-
-function typeBadgeClass(type: Movement['type']) {
-  const base = 'inline-flex px-2 py-0.5 rounded-full text-xs font-medium'
-  return {
-    monthly_payment: `${base} bg-green-100 text-green-700`,
-    manual_payment:  `${base} bg-blue-100 text-blue-700`,
-    expense:         `${base} bg-red-100 text-red-600`,
-  }[type] ?? `${base} bg-gray-100 text-gray-600`
-}
-
-function formatAmount(n: number) {
-  return '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-}
-
-const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
-
-function monthName(month: number | undefined) {
-  if (!month) return '–'
-  return MONTHS[month - 1] ?? '–'
-}
-
-function formatDate(iso: string) {
-  if (!iso) return '–'
-  const [year, month, day] = iso.split('T')[0].split('-').map(Number)
-  return new Date(year, month - 1, day).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', year: 'numeric' })
-}
 </script>

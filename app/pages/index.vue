@@ -21,22 +21,24 @@
         color="blue"
       />
       <UiKpiCard
-        title="Cobrado este mes"
-        :value="formatAmount(summary.finance_kpis.collected)"
-        icon="heroicons:check-circle"
+        title="Cobrado en el año"
+        :value="formatClp(summary.finance_kpis.total_income)"
+        icon="heroicons:arrow-trending-up"
         color="green"
+        subtitle="Mensualidades + otros ingresos"
       />
       <UiKpiCard
-        title="Pendiente este mes"
-        :value="formatAmount(summary.finance_kpis.pending)"
-        icon="heroicons:clock"
-        color="yellow"
+        title="Gastado en el año"
+        :value="formatClp(summary.finance_kpis.total_expenses)"
+        icon="heroicons:arrow-trending-down"
+        color="red"
       />
       <UiKpiCard
-        title="Ingresos del año"
-        :value="formatAmount(summary.finance_kpis.total_income)"
+        title="Saldo neto"
+        :value="formatClp(summary.finance_kpis.net_balance)"
         icon="heroicons:currency-dollar"
-        color="green"
+        :color="summary.finance_kpis.net_balance < 0 ? 'red' : 'green'"
+        subtitle="Cobrado − gastado"
       />
     </div>
 
@@ -201,7 +203,7 @@ const typeColors: Record<string, string> = {
 const { data: summary, pending } = await useAsyncData('dashboard-summary',
   () => useApi().apiFetch<{
     active_students: number
-    finance_kpis: { collected: number; pending: number; balance: number; total_income: number }
+    finance_kpis: { total_income: number; total_expenses: number; net_balance: number }
   }>('/api/dashboard/summary/')
 )
 
@@ -302,10 +304,6 @@ const typeDotColor: Record<string, string> = {
 const currentDate = new Date().toLocaleDateString('es-AR', {
   weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
 })
-
-function formatAmount(n: number) {
-  return '$' + n.toLocaleString('es-AR')
-}
 
 function formatDate(iso: string) {
   const d = new Date(iso)
